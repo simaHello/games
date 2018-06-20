@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>大富翁</title>
+    <link rel="stylesheet" href="index.css">
+    <!-- <script src="index.js"></script> -->
+</head>
+
+<body>
+    
+    <div id="bigBox" ng-app="dafuweng" ng-controller="dafuwengController">
+        <div id="gameBox" >
+            <div class="dices">
+                <div class="dice1"></div>
+                <div class="dice2"></div>
+                <div class="dice3"></div>
+            </div>       
+        </div>
+        <div class="btns">
+            <div class="startGame">开始游戏</div>
+            <div class="gameTime">您当前剩余<span></span>次游戏次数</div>
+        </div>
+        <div class="msg">
+            <p>你获得了 <span></span>张爱心券 </p>
+            <div>确定</div>
+        </div>
+    </div>
+    
+    <!-- <div class="box" style="width:50px;height:50px;background-color:bisque;"></div> -->
+</body>
+
+<script src="../jquery.js"></script>
+<script src="../jquery.min.js"></script>
+<!-- <script src="../../swiper.jquery.min.js"></script> -->
+<!-- <script src="../../bower_components/angular/angular.js"></script>
+<script src="../../bower_components/angular-route/angular-route.js"></script>
+<script src="../../bower_components/angular-md5/angular-md5.min.js"></script>
+<script src="../../bower_components/angular-popups/dist/angular-popups.js"></script>
+
+<script src="../../bower_components/moment/min/moment.min.js"></script>
+<script src="../../bower_components/iosOverlay/js/iosOverlay.js"></script>
+<script src="../../bower_components/iosOverlay/js/iosJavaOverlay.js"></script>
+<script src="../../bower_components/iosOverlay/js/spin.min.js"></script>
+
+<script src="../../bower_components/iscroll/src/core.js"></script>
+<script src="../../bower_components/iscroll/build/iscroll.js"></script>
+<script src="../../bower_components/mobiscroll/mobiscroll.core.js"></script>
+<script src="../../bower_components/mobiscroll/mobiscroll.datetime.js"></script>
+<script src="../../bower_components/mobiscroll/mobiscroll.android-ics.js"></script>
+<script src="../../bower_components/mobiscroll/mobiscroll.select.js"></script>
+<script src="../../bower_components/mobiscroll/mobiscroll.i18n.zh.js"></script>
+<script src="../../bower_components/moment/moment.js"></script>
+<script src="../../bower_components/underscore/underscore-min.js"></script>
+<script src="../../bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
+<script src="../../bower_components/html5-boilerplate/dist/js/vendor/modernizr-2.8.3.min.js"></script>
+<script src="../../bower_components/angular-bootstrap-lightbox/dist/angular-bootstrap-lightbox.js"></script>
+<script src="../../bower_components/ionic/release/js/ionic.bundle.js"></script>
+<script src="../../bower_components/angular-ui-select/dist/select.js"></script>
+<script src="../../app.js"></script>
+<script src="../../AppConfig.js"></script>
+<script src="../../app.factory.js"></script>
+<script src="../../Directive/confirmModal/confirmModalFactory.js"></script>
+<script src="../../commonJs/Hdbs_Base.js"></script> -->
+
+
+<script>
+    var prizeNum;
+    var getPrizeNum;//获取游戏结果的方法
+    var gameBoxWidth;
+    
+    var boxWidth;
+    var gameTime=5;
+    var sendMsg;//提交什么请求的方法
+
+    // angular.module('dafuweng',['ngRoute', 'myApp.factory'])
+    // .controller('dafuwengController',['$scope','$http','AjaxFactory',function($scope,$http,AjaxFactory){
+    //     // var $ = function(ele){
+    //     //     if(typeof ele == "string"){
+    //     //         ele = document.querySelectorAll(ele);
+    //     //     }
+    //     //     return angular.element(ele);
+    //     // };
+    //     getPrizeNum=function(){
+    //         prizeNum=99.9*Math.random()+0.1;
+    //         prizeNum=parseFloat(prizeNum.toFixed(1));
+    //         console.log(prizeNum+'--游戏奖励')
+    //     };
+
+    //     sendMsg=function(){
+    //         console.log("提交一个什么请求，让后台改变用户账户的状态")
+    //     }
+        
+    // }]);
+
+
+    $(function(){
+        getPrizeNum=function(){
+            prizeNum=99.9*Math.random()+0.1;
+            prizeNum=parseFloat(prizeNum.toFixed(1));
+            console.log(prizeNum+'--游戏奖励')
+        };
+        sendMsg=function(){
+            console.log("提交一个什么请求，让后台改变用户账户的状态")
+        }
+        //--第一次获取游戏结果
+        getPrizeNum();
+        console.log(prizeNum+"--最终可获得的爱心券的数量");
+
+        //搭建游戏界面
+        gameBoxWidth=$("#gameBox").width();
+        boxWidth=gameBoxWidth/5;
+        $("#gameBox").height(gameBoxWidth);
+        console.log(gameBoxWidth+"--游戏方格界面的宽度");
+        $(".gameTime span").html(gameTime);
+
+        //添加16个游戏方格
+        for(var i=0;i<16; i++){
+            var box="<div class='box'><p class='num'></p><P>爱心券</p></div>"
+            $("#gameBox").append(box);
+        }
+
+        //设置方格css样式
+        $(".box").width(boxWidth-2);
+        $(".box").height(boxWidth-2);       
+        for(var i=0;i<$(".box").length;i++){
+            if(i<5){
+                $(".box").eq(i).css({left:i*boxWidth,top:0})
+            }else if(i<9){
+                $(".box").eq(i).css({left:4*boxWidth,top:(i-4)*boxWidth})
+            }else if(i<13){
+                $(".box").eq(i).css({left:(12-i)*boxWidth,top:4*boxWidth})
+            }else{
+                $(".box").eq(i).css({left:0*boxWidth,top:(16-i)*boxWidth})
+            }
+        };
+        //给每个游戏方格中设置随机数量的爱心券
+        aixinNum();
+        
+
+        //起始框的位置--startIndex
+        var startIndex=0;
+        setStartIndex();
+        
+        var diceSum;
+        var dice1,dice2,dice3;
+        //---设置骰子的点数
+        setDice();
+
+        var finalIndex;
+        //设置最终奖励的位置
+        setFinalIndex();
+        
+        
+        
+
+
+               
+        
+        
+        
+        
+
+
+        //游戏动画
+        var diceWidth=$(".dice1").width();
+        console.log(diceWidth+"---骰子的宽度")
+        //--骰子的初始状态
+        $(".dice1").css({backgroundSize:diceWidth*2,backgroundPositionX:0-diceWidth,backgroundPositionY:0*diceWidth});
+        $(".dice2").css({backgroundSize:diceWidth*2,backgroundPositionX:0-diceWidth,backgroundPositionY:0*diceWidth});
+        $(".dice3").css({backgroundSize:diceWidth*2,backgroundPositionX:0-diceWidth,backgroundPositionY:0*diceWidth});
+        //--小棋子最初始的状态
+        var qizi="<img src='img/qizi.png'>"
+        $(".box").eq(startIndex).append(qizi);
+        
+        var isStart=false;
+
+        //---点击开始游戏
+        $(".startGame").click(function(){
+            if(!isStart){
+                //点击游戏开始
+                isStart=true;
+                //游戏次数减一，重新设置显示的游戏次数
+                gameTime--;
+                setGameTime();
+
+                //骰子动画
+                var i=0;
+                var timer=setInterval(function(){
+                    if(i<24){
+                        $(".dice1").css({
+                            backgroundPositionX:0,backgroundPositionY:(0-i)*diceWidth
+                        });
+                        $(".dice2").css({
+                            backgroundPositionX:0,backgroundPositionY:(3-i)*diceWidth
+                        });
+                        $(".dice3").css({
+                            backgroundPositionX:0,backgroundPositionY:(5-i)*diceWidth
+                        });
+                        i++;
+                    }else{
+                        $(".dice1").css({
+                            backgroundPositionX:0-diceWidth,backgroundPositionY:(1-dice1)*diceWidth
+                        });
+                        $(".dice2").css({
+                            backgroundPositionX:0-diceWidth,backgroundPositionY:(1-dice2)*diceWidth
+                        });
+                        $(".dice3").css({
+                            backgroundPositionX:0-diceWidth,backgroundPositionY:(1-dice3)*diceWidth
+                        });
+                        clearInterval(timer);
+                    };                   
+                },80);
+
+                //骰子动画结束，开始小棋子动画
+                var timer2=setTimeout(function(){
+                    var i=1;
+                    var timers=setInterval(function(){
+                        if(i<=diceSum){
+                            $(".box img").remove(); 
+                            startIndex++;                           
+                            if(startIndex>15){
+                                startIndex=startIndex-16;
+                            }                            
+                            $(".box").eq(startIndex).append(qizi);
+                            i++;
+                                                      
+                        }else{
+                            //小棋子动画结束，提示框弹出
+                            setTimeout(function(){
+                                $(".msg p span").html(prizeNum);
+                                $(".msg").css('display','block');
+                            },500);                           
+                            clearInterval(timers);
+                        };                   
+                    },180);
+                },2200)
+            }
+            
+        });
+
+        //---点击提示框确定按钮
+        $(".msg div").click(function(){
+            $(".msg").css('display','none');
+            sendMsg();
+            if(gameTime>0){
+                getPrizeNum();
+                $(".dice1").css({
+                    backgroundPositionX:0-diceWidth,backgroundPositionY:0*diceWidth
+                });
+                $(".dice2").css({
+                    backgroundPositionX:0-diceWidth,backgroundPositionY:0*diceWidth
+                });
+                $(".dice3").css({
+                    backgroundPositionX:0-diceWidth,backgroundPositionY:0*diceWidth
+                });
+                //给每个游戏方格中设置随机数量的爱心券
+                $(".box").css({backgroundColor:'bisque'});
+                aixinNum();
+                //---设置起始框的位置
+                setStartIndex();
+                //---设置骰子的点数
+                setDice();
+                //设置最终奖励的位置
+                setFinalIndex();
+                
+                
+                isStart=false;
+
+            }
+        });
+
+
+
+        //-----------一些封装的方法
+
+        //--给每个游戏方格中设置随机数量的爱心券
+        function aixinNum(){
+            for(var i=0;i<$(".box").length;i++){
+                
+                var num=99.9*Math.random()+0.1;
+                num=parseFloat(num.toFixed(1));
+                $(".box .num").eq(i).html(num);
+            }
+        }
+        //--设置最终奖励的位置
+        function setFinalIndex(){
+            finalIndex=startIndex+diceSum>15?startIndex+diceSum-16:startIndex+diceSum;
+            console.log(finalIndex+"--游戏奖励方格序号");
+            $(".box .num").eq(finalIndex).html(prizeNum);            
+            $(".box").eq(finalIndex).css({backgroundColor:'red'});
+        };
+        //--设置骰子的点数
+        function setDice(){
+            dice1=Math.round(5*Math.random())+1;
+            dice2=Math.round(5*Math.random())+1;
+            dice3=Math.round(5*Math.random())+1;
+            diceSum=dice1+dice2+dice3;
+            console.log(dice1+"--骰子1结果数");
+            console.log(dice2+"--骰子2结果数");
+            console.log(dice3+"--骰子3结果数");
+            console.log(diceSum+"--骰子总和");
+        };
+        //--设置起始框的位置
+        function setStartIndex(){
+            $(".box img").remove();
+            // startIndex=finalIndex-diceSum>=0?finalIndex-diceSum:finalIndex-diceSum+16;
+            $(".box").eq(startIndex).css({backgroundColor:'green'});
+            console.log(startIndex+"--起始框的位置");
+            $(".box").eq(startIndex).append(qizi);
+        };
+        //--设置当前剩余游戏次数
+        function setGameTime(){
+            $(".gameTime span").html(gameTime);
+        }
+    });
+    
+</script>
+
+</html>

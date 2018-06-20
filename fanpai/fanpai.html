@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>翻牌</title>
+    <link rel="stylesheet" href="fanpai.css">
+</head>
+
+<body>
+    <div id="fanpaiBox" ng-app="fanpai" ng-controller="fanpaiController">
+        <div id="gameBox">
+            <div class="title">
+                <img src="img/title.png">
+            </div>
+            <div class="fanpai">
+            </div>
+            <div class="gameTime"> 您还有 <span></span> 次机会 </div>
+            <div class="msg">
+                <p>你获得了 <span></span>张爱心券 </p>
+                <div>确定</div>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+<script src="../jquery.js"></script>
+<script src="../jquery.min.js"></script>
+<!-- <script src="../../swiper.jquery.min.js"></script>
+<script src="../../bower_components/angular/angular.js"></script>
+<script src="../../bower_components/angular-route/angular-route.js"></script>
+<script src="../../bower_components/angular-md5/angular-md5.min.js"></script>
+<script src="../../bower_components/angular-popups/dist/angular-popups.js"></script>
+
+<script src="../../bower_components/moment/min/moment.min.js"></script>
+<script src="../../bower_components/iosOverlay/js/iosOverlay.js"></script>
+<script src="../../bower_components/iosOverlay/js/iosJavaOverlay.js"></script>
+<script src="../../bower_components/iosOverlay/js/spin.min.js"></script>
+
+<script src="../../bower_components/iscroll/src/core.js"></script>
+<script src="../../bower_components/iscroll/build/iscroll.js"></script>
+<script src="../../bower_components/mobiscroll/mobiscroll.core.js"></script>
+<script src="../../bower_components/mobiscroll/mobiscroll.datetime.js"></script>
+<script src="../../bower_components/mobiscroll/mobiscroll.android-ics.js"></script>
+<script src="../../bower_components/mobiscroll/mobiscroll.select.js"></script>
+<script src="../../bower_components/mobiscroll/mobiscroll.i18n.zh.js"></script>
+<script src="../../bower_components/moment/moment.js"></script>
+<script src="../../bower_components/underscore/underscore-min.js"></script>
+<script src="../../bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
+<script src="../../bower_components/html5-boilerplate/dist/js/vendor/modernizr-2.8.3.min.js"></script>
+<script src="../../bower_components/angular-bootstrap-lightbox/dist/angular-bootstrap-lightbox.js"></script>
+<script src="../../bower_components/ionic/release/js/ionic.bundle.js"></script>
+<script src="../../bower_components/angular-ui-select/dist/select.js"></script>
+<script src="../../app.js"></script>
+<script src="../../AppConfig.js"></script>
+<script src="../../app.factory.js"></script>
+<script src="../../Directive/confirmModal/confirmModalFactory.js"></script>
+<script src="../../commonJs/Hdbs_Base.js"></script> -->
+
+
+<script>
+    var prizeNum;//游戏最终结果
+    var getPrizeNum;//获取游戏结果的方法
+    
+    var boxWidth;//游戏动画界面宽度
+    var gameTime=5;
+    var sendMsg;//提交什么请求的方法
+    var arr=[];//其他7个方格游戏结果
+    var arr2=[];//所有方格position位置
+    var index;//游戏结果所在方格
+    var isStart=false;//游戏是否已经开始
+    var cardsStatus=false;//卡片是否可以被点击
+    // angular.module('fanpai',['ngRoute', 'myApp.factory'])
+    // .controller('fanpaiController',['$scope','$http','AjaxFactory',function($scope,$http,AjaxFactory){
+    //     // var $ = function(ele){
+    //     //     if(typeof ele == "string"){
+    //     //         ele = document.querySelectorAll(ele);
+    //     //     }
+    //     //     return angular.element(ele);
+    //     // };
+    //     getPrizeNum=function(){
+    //         prizeNum=99.9*Math.random()+0.1;
+    //         prizeNum=parseFloat(prizeNum.toFixed(1));
+    //     };
+
+    //     sendMsg=function(){
+    //         console.log("提交一个什么请求，让后台改变用户账户的状态")
+    //     };        
+    // }]);
+
+    $(function(){
+        getPrizeNum=function(){
+            prizeNum=99.9*Math.random()+0.1;
+            prizeNum=parseFloat(prizeNum.toFixed(1));
+        };
+
+        sendMsg=function(){
+            console.log("提交一个什么请求，让后台改变用户账户的状态")
+        }; 
+    //--------------------------------界面设置
+        boxWidth=$("#gameBox .fanpai").width();
+        var cardsWidth=boxWidth/3;
+        console.log(boxWidth+'---翻牌box的宽度');
+
+        //添加9个卡片设置卡片样式
+        $("#gameBox .fanpai").css({height:cardsWidth*1.2*3})
+        var cards="<div class='cards'><h1></h1><div></div></div>";
+        for(var i=0;i<9;i++){
+            $("#gameBox .fanpai").append(cards);
+            if(i==4){
+                $("#gameBox .fanpai .cards p").eq(i).remove();
+                $("#gameBox .fanpai .cards").eq(i).addClass('startGame');
+            }else{
+                $("#gameBox .fanpai .cards").eq(i).addClass('prizeNum');
+            };
+        };
+
+        
+        $("#gameBox .fanpai .cards").css({width:cardsWidth-8,height:cardsWidth*1.2-6,backgroundImage:'url(img/card6.jpg)'});
+        $("#gameBox .fanpai .startGame").css({backgroundImage:'url(img/start.jpg)'});
+        $("#gameBox .fanpai .startGame div").remove();
+        //设置卡片位置
+        setPosition();
+        
+        
+
+
+        //为八个卡片设置index属性
+        for(var i=0;i<8;i++){
+            $("#gameBox .fanpai .prizeNum").eq(i).attr('index',i);
+        };
+
+
+
+        
+    //----------------------------数据初始化设置    
+        //获取最终游戏结果
+        getPrizeNum();       
+        console.log(prizeNum+'---游戏最终结果');
+
+        //设置游戏剩余次数
+        $(".gameTime span").html(gameTime);
+        //设置卡片上金元宝数量
+        setNum();
+        
+        //设置游戏结果所在方格
+        index=Math.round(8*Math.random());
+        console.log(index+'--游戏结果所在方格');
+        //最终结果所在方格设置
+        $("#gameBox .fanpai .prizeNum h1").eq(index).html(prizeNum);
+        //其他起个方格游戏结果设置
+        setCards(index);
+
+        //为startGame绑定事件
+        $("#gameBox .fanpai .startGame").click(function(){
+            if(!isStart){
+                isStart=true;
+
+                donghua();
+                cardsStatus=true;
+            }else{
+                return;
+            };
+        });
+
+        //为弹框中的确定绑定事件
+        $(".msg div").click(function(){
+            $(".msg").css('display','none');
+            sendMsg();
+            if(gameTime>0){
+                getPrizeNum();//获取新的游戏结果
+                console.log(prizeNum+'------游戏最终结果');
+                setNum();//获取新的其他七个方格的值
+                index=Math.round(8*Math.random());//设置游戏结果所在的方格
+                $("#gameBox .fanpai .prizeNum h1").eq(index).html(prizeNum);
+                $("#gameBox .fanpai .cards").css({width:cardsWidth-8,height:cardsWidth*1.2-6,backgroundImage:'url(img/card6.jpg)'});
+
+                setCards(index);
+                isStart=false;
+            };
+        });
+
+
+
+
+
+        //------------------------------------------------封装的方法
+        
+
+
+        //设置卡片上的金元宝数量（设置arr[]的值）
+        function setNum(){
+            for(var i=0;i<7;i++){
+                var num=99.9*Math.random()+0.1;
+                num=parseFloat(num.toFixed(1));
+                arr[i]=num; 
+            }
+            console.log(arr);
+        }
+
+        //点击开始游戏之后的动画(卡片收回到开始游戏背后再放出来旋转)
+        function donghua(){
+            $("#gameBox .fanpai .prizeNum").animate({left:arr2[4].left,top:arr2[4].top},1000,function(){
+                $("#gameBox .fanpai .prizeNum").children().css({display:'none'});
+                for(var i=0;i<9;i++){
+                    if(i<3){
+                        $("#gameBox .fanpai .cards").eq(i).css({backgroundImage:'url(img/card'+(i+1)+'.jpg)'});
+                    }else if(i<6){
+                        $("#gameBox .fanpai .cards").eq(i).css({backgroundImage:'url(img/card'+(6-i)+'.jpg)'});
+                    }else{
+                        $("#gameBox .fanpai .cards").eq(i).css({backgroundImage:'url(img/card'+(i-5)+'.jpg)'});
+                    }
+                    
+                };
+                
+                for(var i=0;i<9;i++){
+                    $("#gameBox .fanpai .cards").eq(i).animate({left:arr2[i].left,top:arr2[i].top},1000,function(){
+                        
+                    });
+                };
+                $("#gameBox .fanpai .prizeNum").addClass('rotate');
+                $("#gameBox .fanpai .prizeNum").click(prizeClick);
+            });
+        };
+
+        //点击卡片后的方法
+        function prizeClick(){
+            if(cardsStatus){
+                cardsStatus=false;
+                gameTime--;
+                $(".gameTime span").html(gameTime);
+                console.log(gameTime+'---剩余游戏次数')
+                index=$(this).attr('index');
+                $("#gameBox .fanpai .prizeNum h1").eq(index).html(prizeNum);
+                $("#gameBox .fanpai .prizeNum").eq(index).children().css({display:'block'});
+                $("#gameBox .fanpai .prizeNum").eq(index).removeClass('rotate');
+                $("#gameBox .fanpai .prizeNum").eq(index).css({backgroundImage:'url(img/card4.jpg)'});
+                luanXu(arr);
+                console.log(arr);
+                setTimeout(function(){
+                    console.log(index);
+                    setCards(index);
+                    $("#gameBox .fanpai .prizeNum").removeClass('rotate');
+                    $("#gameBox .fanpai .prizeNum").children().css({display:'block'});                    
+                    $("#gameBox .fanpai .cards").css({backgroundImage:'url(img/card5.jpg)'});
+                    $("#gameBox .fanpai .prizeNum").eq(index).css({backgroundImage:'url(img/card4.jpg)'});
+                },1000);
+                setTimeout(function(){
+                    $(".msg p span").html(prizeNum);
+                    $(".msg").css({display:'block'});
+                },2000)
+                
+            }
+            
+        }
+
+        //设置其他7个方格的方法
+        function setCards(index){
+            console.log(index+'----在方法里面打印的index')
+            var num=0;
+            for(var i=0;i<8;i++){
+                if(i==index){
+                    continue;
+                }else{
+                    $("#gameBox .fanpai .prizeNum h1").eq(i).html(arr[num]);
+                    num++;
+                };
+            };
+        };
+        //设置方格位置的方法
+        function setPosition(){
+            var num=0;
+            for(var n=0;n<3;n++){
+                for(var i=0;i<3;i++){
+                    // console.log(i);
+                    // console.log(n);
+                    $("#gameBox .fanpai .cards").eq(num).css({left:cardsWidth*i,top:cardsWidth*1.2*n});
+                    arr2[num]={'left':cardsWidth*i,'top':cardsWidth*1.2*n};
+                    num++;
+                };
+            };
+            console.log(arr2)
+        };
+
+
+        //将其他7个方格中的游戏结果乱序
+        function luanXu(a) {
+            var len = a.length;
+            for (var i = 0; i < len - 1; i++) {
+                var index = parseInt(Math.random() * (len - i));
+                var temp = a[index];
+                a[index] = a[len - i - 1];
+                a[len - i - 1] = temp;
+            }
+        };
+    });
+</script>
+
+</html>

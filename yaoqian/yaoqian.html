@@ -1,0 +1,227 @@
+<!doctype html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>摇签</title>
+<link rel="stylesheet" href="yaoqian.css">
+</head>
+<body>
+    <div id="yaoqianBox" ng-app="yaoqian" ng-controller="yaoqianController">
+        <div class="zhuangtai">
+            <img src="img/zhuangtai.jpg" alt="">
+        </div>
+        <div id="gameBox">
+            <div class="title">
+                <img src="img/title.png" alt="">
+            </div>
+            <div id="qian" class="">
+                <div class="qiantong"></div>
+                <div class="dianji"></div>
+            </div>
+            <div class="btns">
+                
+                <div class="gameTime">您还有 <span></span> 次机会</div>
+            </div>       
+        </div>
+        <div class="msg">
+            <div class="tanchuang">
+                <img src="img/yuanbao.png" alt="">
+                <p>获得 <span></span>个金元宝 </p>
+            </div>
+            
+            <div class="queding">
+                <img src="img/queding.png" alt="">
+            </div>
+        </div>
+    </div>
+
+
+
+    
+
+</body>
+
+<script src="../jquery.js"></script>
+<script src="../jquery.min.js"></script>
+<!-- <script src="../../swiper.jquery.min.js"></script>
+<script src="../../bower_components/angular/angular.js"></script>
+<script src="../../bower_components/angular-route/angular-route.js"></script>
+<script src="../../bower_components/angular-md5/angular-md5.min.js"></script>
+<script src="../../bower_components/angular-popups/dist/angular-popups.js"></script>
+
+<script src="../../bower_components/moment/min/moment.min.js"></script>
+<script src="../../bower_components/iosOverlay/js/iosOverlay.js"></script>
+<script src="../../bower_components/iosOverlay/js/iosJavaOverlay.js"></script>
+<script src="../../bower_components/iosOverlay/js/spin.min.js"></script>
+
+<script src="../../bower_components/iscroll/src/core.js"></script>
+<script src="../../bower_components/iscroll/build/iscroll.js"></script>
+<script src="../../bower_components/mobiscroll/mobiscroll.core.js"></script>
+<script src="../../bower_components/mobiscroll/mobiscroll.datetime.js"></script>
+<script src="../../bower_components/mobiscroll/mobiscroll.android-ics.js"></script>
+<script src="../../bower_components/mobiscroll/mobiscroll.select.js"></script>
+<script src="../../bower_components/mobiscroll/mobiscroll.i18n.zh.js"></script>
+<script src="../../bower_components/moment/moment.js"></script>
+<script src="../../bower_components/underscore/underscore-min.js"></script>
+<script src="../../bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
+<script src="../../bower_components/html5-boilerplate/dist/js/vendor/modernizr-2.8.3.min.js"></script>
+<script src="../../bower_components/angular-bootstrap-lightbox/dist/angular-bootstrap-lightbox.js"></script>
+<script src="../../bower_components/ionic/release/js/ionic.bundle.js"></script>
+<script src="../../bower_components/angular-ui-select/dist/select.js"></script>
+<script src="../../app.js"></script>
+<script src="../../AppConfig.js"></script>
+<script src="../../app.factory.js"></script>
+<script src="../../Directive/confirmModal/confirmModalFactory.js"></script>
+<script src="../../commonJs/Hdbs_Base.js"></script> -->
+
+<script>
+    var prizeNum;
+    var getPrizeNum;//获取游戏结果的方法
+    var gameTime=5;
+    var sendMsg;//提交什么请求的方法
+
+    // angular.module('yaoqian',['ngRoute', 'myApp.factory'])
+    // .controller('yaoqianController',['$scope','$http','AjaxFactory',function($scope,$http,AjaxFactory){
+    //     // var $ = function(ele){
+    //     //     if(typeof ele == "string"){
+    //     //         ele = document.querySelectorAll(ele);
+    //     //     }
+    //     //     return angular.element(ele);
+    //     // };
+    //     getPrizeNum=function(){
+    //         prizeNum=99.9*Math.random()+0.1;
+    //         prizeNum=parseFloat(prizeNum.toFixed(1))
+    //     };
+
+    //     sendMsg=function(){
+    //         console.log("提交一个什么请求，让后台改变用户账户的状态")
+    //     }
+        
+    // }]);
+
+
+
+
+    $(function(){
+        getPrizeNum=function(){
+            prizeNum=99.9*Math.random()+0.1;
+            prizeNum=parseFloat(prizeNum.toFixed(1))
+        };
+
+        sendMsg=function(){
+            console.log("提交一个什么请求，让后台改变用户账户的状态")
+        }
+        //设置游戏剩余次数
+        $(".gameTime span").html(gameTime);
+        //获取游戏结果
+        getPrizeNum();
+        var isShaking=false;
+
+        //搭建游戏界面
+        $('#yaoqianBox #gameBox').height($('body').height()-$('.zhuangtai').height());
+
+        $('.dianji').click(yaoqian);
+        //摇晃后的回调函数
+        function yaoqian(){
+            if(!isShaking){
+                isShaking=true;
+                gameTime--;
+                setGameTime();
+
+                var i=0;
+                
+                var timer=setInterval(function(){
+                    if(i<30){
+                        if(i%2==0){
+                            $("#yaoqianBox #gameBox #qian .qiantong").removeClass('qian2')
+                            $("#yaoqianBox #gameBox #qian .qiantong").addClass('qian1')
+                        }else{
+                            $("#yaoqianBox #gameBox #qian .qiantong").removeClass('qian1')
+                            $("#yaoqianBox #gameBox #qian .qiantong").addClass('qian2')
+                        };
+                        i++;
+                    }else{
+                        $("#yaoqianBox #gameBox #qian .qiantong").removeClass('qian1');
+                        $("#yaoqianBox #gameBox #qian .qiantong").removeClass('qian2');
+                        clearInterval(timer);
+                    };                    
+                },100);
+
+                var timer2=setTimeout(function(){
+                    $(".msg p span").html(prizeNum);
+                    $(".msg").css('display','block');
+                },4000)
+            };            
+        };
+
+        //---点击提示框确定按钮
+        $(".msg .queding").click(function(){
+            $(".msg").css('display','none');
+            sendMsg();
+            if(gameTime>0){
+                getPrizeNum();              
+                isShaking=false;
+
+            }
+        });
+
+        function setGameTime(){
+            $(".gameTime span").html(gameTime);
+        }
+
+
+
+
+
+        //检测设备是否摇动
+        var shake1 = new Shake(1000,yaoqian);
+        shake1.init();
+
+        function Shake(threshold,callback){
+            this.SHAKE_THRESHOLD = threshold ? threshold : 2000; //定义阈值
+            this.last_update = 0;
+            this.x = this.y = this.z = this.last_x = this.last_y = this.last_z = 0;
+            this.init = function(){
+                if (window.DeviceMotionEvent) {
+                    console.log(1111);
+                    window.addEventListener('devicemotion', this.deviceMotionHandler, false);
+                } else {
+                    alert('您的浏览器不支持DeviceMotion');
+                    $('.startGame').css({display:'block'});
+                };
+            };
+            var that = this;
+            this.deviceMotionHandler = function(eventData) {
+                var acceleration = eventData.accelerationIncludingGravity;
+                var curTime = new Date().getTime();
+                if ((curTime - that.last_update) > 100) {
+                    var diffTime = curTime - that.last_update;
+                    that.last_update = curTime;
+                    that.x = acceleration.x;
+                    that.y = acceleration.y;
+                    that.z = acceleration.z;
+                    var speed = Math.abs(that.x + that.y + that.z - that.last_x - that.last_y - that.last_z) / diffTime * 10000;
+
+                    if (speed > that.SHAKE_THRESHOLD) {
+                        if(window.console && console.log){
+                            console.log("shaked");
+                        }
+                        if(callback != undefined){
+                            
+                            callback(that);
+                        }
+                        
+                    }
+                    that.last_x = that.x;
+                    that.last_y = that.y;
+                    that.last_z = that.z;
+                };
+            };
+            
+        };
+    });
+
+    
+
+</script>
+</html>

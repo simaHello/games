@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>跑马灯</title>
+    <link rel="stylesheet" href="index.css">
+    <!-- <script src="index.js"></script> -->
+</head>
+
+<body>
+    
+    <div id="bigBox" ng-app="paomadeng" ng-controller="paomadengController">
+        <div id="gameBox" >
+            <!-- <div class="dices">
+                <div class="dice1"></div>
+                <div class="dice2"></div>
+                <div class="dice3"></div>
+            </div>        -->
+        </div>
+        <div class="btns">
+            <div class="startGame">开始游戏</div>
+            <div class="gameTime">您当前剩余<span></span>次游戏次数</div>
+        </div>
+        <div class="msg">
+            <p>你获得了 <span></span>个金元宝 </p>
+            <div>确定</div>
+        </div>
+    </div>
+    
+    <!-- <div class="box" style="width:50px;height:50px;background-color:bisque;"></div> -->
+</body>
+
+<script src="../jquery.js"></script>
+<script src="../jquery.min.js"></script>
+<!-- <script src="../../swiper.jquery.min.js"></script>
+<script src="../../bower_components/angular/angular.js"></script>
+<script src="../../bower_components/angular-route/angular-route.js"></script>
+<script src="../../bower_components/angular-md5/angular-md5.min.js"></script>
+<script src="../../bower_components/angular-popups/dist/angular-popups.js"></script>
+
+<script src="../../bower_components/moment/min/moment.min.js"></script>
+<script src="../../bower_components/iosOverlay/js/iosOverlay.js"></script>
+<script src="../../bower_components/iosOverlay/js/iosJavaOverlay.js"></script>
+<script src="../../bower_components/iosOverlay/js/spin.min.js"></script>
+
+<script src="../../bower_components/iscroll/src/core.js"></script>
+<script src="../../bower_components/iscroll/build/iscroll.js"></script>
+<script src="../../bower_components/mobiscroll/mobiscroll.core.js"></script>
+<script src="../../bower_components/mobiscroll/mobiscroll.datetime.js"></script>
+<script src="../../bower_components/mobiscroll/mobiscroll.android-ics.js"></script>
+<script src="../../bower_components/mobiscroll/mobiscroll.select.js"></script>
+<script src="../../bower_components/mobiscroll/mobiscroll.i18n.zh.js"></script>
+<script src="../../bower_components/moment/moment.js"></script>
+<script src="../../bower_components/underscore/underscore-min.js"></script>
+<script src="../../bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
+<script src="../../bower_components/html5-boilerplate/dist/js/vendor/modernizr-2.8.3.min.js"></script>
+<script src="../../bower_components/angular-bootstrap-lightbox/dist/angular-bootstrap-lightbox.js"></script>
+<script src="../../bower_components/ionic/release/js/ionic.bundle.js"></script>
+<script src="../../bower_components/angular-ui-select/dist/select.js"></script>
+<script src="../../app.js"></script>
+<script src="../../AppConfig.js"></script>
+<script src="../../app.factory.js"></script>
+<script src="../../Directive/confirmModal/confirmModalFactory.js"></script>
+<script src="../../commonJs/Hdbs_Base.js"></script>> -->
+
+
+<script>
+    var prizeNum;
+    var getPrizeNum;//获取游戏结果的方法
+    var gameBoxWidth;
+    
+    var boxWidth;
+    var gameTime=5;
+    var sendMsg;//提交什么请求的方法
+    var moveNum=0;//方格亮灯的次数
+
+    // angular.module('paomadeng',['ngRoute', 'myApp.factory'])
+    // .controller('paomadengController',['$scope','$http','AjaxFactory',function($scope,$http,AjaxFactory){
+    //     // var $ = function(ele){
+    //     //     if(typeof ele == "string"){
+    //     //         ele = document.querySelectorAll(ele);
+    //     //     }
+    //     //     return angular.element(ele);
+    //     // };
+    //     getPrizeNum=function(){
+    //         prizeNum=99.9*Math.random()+0.1;
+    //         prizeNum=parseFloat(prizeNum.toFixed(1));
+    //         console.log(prizeNum+'--游戏奖励')
+    //     };
+
+    //     sendMsg=function(){
+    //         console.log("提交一个什么请求，让后台改变用户账户的状态")
+    //     }
+        
+    // }]);
+
+
+    $(function(){
+        getPrizeNum=function(){
+            prizeNum=99.9*Math.random()+0.1;
+            prizeNum=parseFloat(prizeNum.toFixed(1));
+            console.log(prizeNum+'--游戏奖励')
+        };
+
+        sendMsg=function(){
+            console.log("提交一个什么请求，让后台改变用户账户的状态")
+        }
+        //--第一次获取游戏结果
+        getPrizeNum();
+        console.log(prizeNum+"--最终可获得的金元宝的数量");
+
+        //搭建游戏界面
+        gameBoxWidth=$("#gameBox").width();
+        boxWidth=gameBoxWidth/5;
+        $("#gameBox").height(gameBoxWidth);
+        console.log(gameBoxWidth+"--游戏方格界面的宽度");
+        $(".gameTime span").html(gameTime);
+
+        //添加16个游戏方格
+        for(var i=0;i<16; i++){
+            var box="<div class='box'><p class='num'></p><P>金元宝</p></div>"
+            $("#gameBox").append(box);
+        }
+
+        //设置方格css样式
+        $(".box").width(boxWidth-2);
+        $(".box").height(boxWidth-2);       
+        for(var i=0;i<$(".box").length;i++){
+            if(i<5){
+                $(".box").eq(i).css({left:i*boxWidth,top:0})
+            }else if(i<9){
+                $(".box").eq(i).css({left:4*boxWidth,top:(i-4)*boxWidth})
+            }else if(i<13){
+                $(".box").eq(i).css({left:(12-i)*boxWidth,top:4*boxWidth})
+            }else{
+                $(".box").eq(i).css({left:0*boxWidth,top:(16-i)*boxWidth})
+            }
+        };
+        //给每个游戏方格中设置随机数量的金元宝
+        aixinNum();
+        
+
+        //起始框的位置--startIndex
+        var startIndex=0;
+        setStartIndex();
+
+        var finalIndex;
+        //设置最终奖励的位置
+        setFinalIndex();
+        
+
+        //游戏动画
+
+        
+        var isStart=false;
+
+        //---点击开始游戏
+        $(".startGame").click(function(){
+            
+            if(!isStart){
+                //点击游戏开始
+                isStart=true;
+                //游戏次数减一，重新设置显示的游戏次数
+                gameTime--;
+                setGameTime();
+
+                //动画开始
+                
+                    var i=1;
+                    var n=-1;
+                    console.log(moveNum+'--动画开始前打印移动次数');
+                    var timers=setInterval(function(){
+                        if(n<moveNum-10){
+                            if(startIndex>15){
+                                startIndex=0;
+                            }
+                            $('.box').eq(startIndex).addClass('shadow').siblings().removeClass('shadow');
+                            startIndex++;
+                            n++;
+                        }else if(n<moveNum-5){
+                            if(i%2==0){
+                                if(startIndex>15){
+                                    startIndex=0;
+                                }
+                                $('.box').eq(startIndex).addClass('shadow').siblings().removeClass('shadow');
+                                startIndex++;
+                                n++;
+                            }
+                        }else if(n<moveNum){
+                            if(i%4==0){
+                                if(startIndex>15){
+                                    startIndex=0;
+                                }
+                                $('.box').eq(startIndex).addClass('shadow').siblings().removeClass('shadow');
+                                startIndex++;
+                                n++;
+                            } 
+                        }else{
+                            if(i%10==0){
+                                $('.msg p span').html(prizeNum);
+                                $('.msg').css({display:'block'});
+                                clearInterval(timers);
+                            };
+                          
+                        }
+                        i++;
+                    },100);                    
+                
+            }
+            
+        });
+
+        //---点击提示框确定按钮
+        $(".msg div").click(function(){
+            $(".msg").css('display','none');
+            sendMsg();
+            if(gameTime>0){
+                getPrizeNum();
+                //给每个游戏方格中设置随机数量的爱心券
+                $(".box").css({backgroundColor:'bisque'});
+                aixinNum();
+                //---设置起始框的位置
+                setStartIndex();
+
+                //设置最终奖励的位置
+                setFinalIndex();
+                
+                
+                isStart=false;
+
+            }
+        });
+
+
+
+        //-----------一些封装的方法
+
+        //--给每个游戏方格中设置随机数量的爱心券
+        function aixinNum(){
+            for(var i=0;i<$(".box").length;i++){
+                
+                var num=99.9*Math.random()+0.1;
+                num=parseFloat(num.toFixed(1));
+                $(".box .num").eq(i).html(num);
+            }
+        }
+        //--设置最终奖励的位置
+        function setFinalIndex(){
+            finalIndex=Math.round(Math.random()*15);
+            console.log(finalIndex+"--游戏奖励方格序号");
+            $(".box .num").eq(finalIndex).html(prizeNum);            
+            $(".box").eq(finalIndex).css({backgroundColor:'red'});
+            moveNum=3*16+finalIndex;
+            console.log(moveNum+'--本次游戏中光圈要移动的方格数')
+        };
+
+        //--设置起始框的位置
+        function setStartIndex(){
+            startIndex=0;
+            $(".box").removeClass('shadow')
+            $(".box").eq(startIndex).css({backgroundColor:'green'});
+            console.log(startIndex+"--起始框的位置");
+        };
+        //--设置当前剩余游戏次数
+        function setGameTime(){
+            $(".gameTime span").html(gameTime);
+        }
+    });
+    
+</script>
+
+</html>
